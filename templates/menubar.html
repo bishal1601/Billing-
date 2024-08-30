@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f5f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            transition: background-color 0.3s;
+        }
+
+        .header {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid #3498db;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header .title {
+            font-size: 2.4em;
+            font-weight: 700;
+        }
+
+        .header .menu-toggle {
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #ecf0f1;
+            background: none;
+            border: none;
+        }
+
+        .header .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-menu .welcome {
+            font-size: 1em;
+            color: #ecf0f1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-menu .dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            min-width: 160px;
+            top: 40px;
+        }
+
+        .user-menu .dropdown a {
+            color: #333;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .user-menu .dropdown a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            margin-top: 75px;
+            margin-left: 220px;
+            transition: margin-left 0.3s;
+        }
+
+        .sidebar {
+            background-color: #ffffff;
+            padding: 20px;
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-right: 2px solid #ddd;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            bottom: 0;
+            transition: transform 0.3s;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 10px 0;
+            font-size: 1em;
+            transition: background-color 0.3s, color 0.3s;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            background-color: #eaf4fc;
+            color: #2980b9;
+        }
+
+        .sidebar a .icon {
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 0px;
+            background-color: #ffffff;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: margin-left 0.3s;
+        }
+
+        .icon-bar {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .icon-bar a {
+            display: block;
+            margin: 10px 0;
+            color: #3498db;
+            font-size: 1.5em;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .icon-bar a:hover {
+            color: #2980b9;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .icon-bar {
+                display: flex;
+            }
+
+            .container {
+                margin-left: 0;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .icon-bar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="title">Dashboard</div>
+        <div class="user-menu">
+            <div class="welcome" onclick="toggleDropdown()">
+                Welcome, Bishal ▼
+            </div>
+            <div class="dropdown" id="dropdownMenu">
+                <a href="#">Profile</a>
+                <a href="#">Change Password</a>
+                <a href="#">Logout</a>
+            </div>
+        </div>
+    </div>
+    <div class="icon-bar" id="iconBar">
+        <a href="/product_report/">📦</a>
+        <a href="/stock_report/">📊</a>
+        <a href="/purchase_report/">🛒</a>
+        <a href="/sales_report/">💵</a>
+        <a href="/collection_report/">📈</a>
+        <a href="/refund_report/">🔄</a>
+        <a href="/expiry_report/">🗒️</a>
+
+        <a href="/vendor_report/">🗃️</a>
+        <a href="/unit_report/">📚</a>
+        <a href="/unit_report/">👤</a>
+    </div>
+    <div class="sidebar" id="sidebar">
+        <a href="/product_report/"><span class="icon">📦</span> Product</a>
+        <a href="/stock_report/"><span class="icon">📊</span> Stock</a>
+        <a href="/purchase_report/"><span class="icon">🛒</span> Purchase</a>
+        <a href="/sales_report/"><span class="icon">💵</span> Sale</a>
+        <a href="/collection_report/"><span class="icon">📈</span> Daily Collection</a>
+        <a href="/refund_report/"><span class="icon">🔄</span> Refund</a>
+
+        <a href="/expiry_report/"><span class="icon">🗒️</span> Expiry</a>
+        <a href="/unit_report/"><span class="icon">📚</span> Unit</a>
+        <a href="/vendor_report/"><span class="icon">🗃️</span> Vendor</a>
+
+        <a href="/user_list/"><span class="icon">👤</span> user</a>
+    </div>
+    <div class="container">
+        <div class="content">
+            {% block content %}
+            <!-- Content goes here -->
+            {% endblock %}
+        </div>
+    </div>
+
+    <script>
+        function toggleDropdown() {
+            var dropdown = document.getElementById("dropdownMenu");
+            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.welcome')) {
+                var dropdown = document.getElementById("dropdownMenu");
+                if (dropdown.style.display === "block") {
+                    dropdown.style.display = "none";
+                }
+            }
+        }
+
+        function toggleSidebar() {
+            var sidebar = document.getElementById("sidebar");
+            var iconBar = document.getElementById("iconBar");
+            if (sidebar.style.display === "none" || sidebar.style.display === "") {
+                sidebar.style.display = "block";
+                iconBar.style.display = "none";
+                document.querySelector(".container").style.marginLeft = "240px";
+            } else {
+                sidebar.style.display = "none";
+                iconBar.style.display = "flex";
+                document.querySelector(".container").style.marginLeft = "70px";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var sidebar = document.getElementById("sidebar");
+            var iconBar = document.getElementById("iconBar");
+            if (window.innerWidth <= 768) {
+                sidebar.style.display = "none"; // Hide sidebar on small screens
+                iconBar.style.display = "flex"; // Show icon bar on small screens
+                document.querySelector(".container").style.marginLeft = "0";
+            } else {
+                sidebar.style.display = "block"; // Show sidebar on larger screens
+                iconBar.style.display = "none";
+                document.querySelector(".container").style.marginLeft = "240px";
+            }
+        });
+    </script>
+</body>
+</html>

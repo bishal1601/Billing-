@@ -1,0 +1,161 @@
+{% extends "menubar.html" %}
+
+{% block title %}Add Unit{% endblock %}
+
+{% block content %}
+<div class="container_addunit">
+    <div class="form-wrapper">
+        <h2>Add Unit</h2>
+        <form method="post" class="form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="full-name">Full Name</label>
+                {{ form.FullName }}
+            </div>
+            <div class="form-group">
+                <label for="short-name">Short Name</label>
+                {{ form.ShortName }}
+            </div>
+            
+            <div class="status_div">
+                <div>
+                    <label for="status">Active</label>
+                </div>
+                <div>
+                    {{ form.Status }}
+                </div>
+            </div>
+            <br>
+            <div class="form-actions">
+                <a href="javascript:history.back()" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-submit">Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .status_div {
+        display: flex;
+        align-items: center;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #555;     
+    }
+
+    body {
+        background-color: #f7f9fc;
+        font-family: Arial, sans-serif;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container_addunit {
+        max-width: 400px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background-color: #ffffff;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    .form-wrapper h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 2rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .form-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #555;
+    }
+
+    .form-group input, .form-group select {
+        width: 60%;
+        padding: 0.6rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+        color: #333;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+        border-color: #3498db;
+        outline: none;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+    }
+
+    .btn-submit{
+        width: 48%;
+        padding: 0.8rem;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+        border: none;
+    }
+    .btn-cancel {
+        width: 40%;
+        padding: 0.8rem;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+        border: none;
+    }
+
+    .btn-submit {
+        background-color:green;
+        color: #ffffff;
+    }
+
+    .btn-submit:hover {
+        background-color: rgb(1, 95, 1);
+        transform: translateY(-2px);
+    }
+
+    .btn-submit:active {
+        background-color: rgb(11, 61, 11);
+        transform: translateY(0);
+    }
+
+    .btn-cancel {
+        background-color: #e74c3c;
+        color: #ffffff;
+    }
+
+    .btn-cancel:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+    }
+
+    .btn-cancel:active {
+        background-color: #96281b;
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}

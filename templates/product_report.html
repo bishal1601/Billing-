@@ -1,0 +1,253 @@
+{% extends "menubar.html" %}
+
+{% block title %}Product List{% endblock %}
+
+{% block content %}
+<style>
+    .body_container {
+        max-width: 100%;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+    }
+    h1 {
+        font-size: 26px;
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 600;
+    }
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .search-box {
+        display: flex;
+        align-items: center;
+        max-width: 300px;
+    }
+    .search-box input[type="text"] {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .add-button {
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: #fff;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+    .add-button:hover {
+        background-color: #218838;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    th, td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+    th {
+        background-color: #343a40;
+        color: #fff;
+        text-transform: uppercase;
+        font-size: 14px;
+        letter-spacing: 0.1em;
+    }
+    tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+    .status-active, .status-inactive {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        text-align: center;
+        display: inline-block;
+    }
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .edit-button {
+        padding: 8px 12px;
+        background-color: #007bff;
+        color: #fff;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+    .edit-button:hover {
+        background-color: #0056b3;
+    }
+    .edit-button i {
+        margin-right: 5px;
+    }
+    .no-products {
+        text-align: center;
+        font-size: 18px;
+        color: #999;
+        margin-top: 30px;
+    }
+</style>
+
+<div class="body_container">
+    <h1>Product List</h1>
+    <div class="header-row">
+        <div class="search-box">
+            <input type="text" id="productSearch" placeholder="Search products..." onkeyup="filterTable()">
+        </div>
+        <a href="/add_product/" class="add-button">Add Product</a>
+    </div>
+    {% if products %}
+        <table id="productTable">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    
+                    <th>Price</th>
+                    <th>Opening Stock</th>
+                    <th>Unit</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    
+                    
+                    <td>{{ product.price }}</td>
+                    <td>{{ product.opening_stock }}</td>
+                    <td>{{ product.unit }}</td>
+                    <td>
+                        <span class="{% if product.status %}status-active{% else %}status-inactive{% endif %}">
+                            {% if product.status %}
+                                Active
+                            {% else %}
+                                Inactive
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="/update_product/{{ product.id }}" class="edit-button">
+                            <i class="fas fa-edit"></i>Edit
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="no-products">No products found.</p>
+    {% endif %}
+</div>
+
+<script>
+    function filterTable() {
+        let input = document.getElementById("stockSearch").value.toLowerCase();
+        let startDate = document.getElementById("startDate").value;
+        let endDate = document.getElementById("endDate").value;
+        let table = document.getElementById("stockTable");
+        let tr = table.getElementsByTagName("tr");
+
+        // Convert start and end dates to Date objects
+        let start = startDate ? new Date(startDate + 'T00:00:00') : null;
+        let end = endDate ? new Date(endDate + 'T23:59:59') : null;
+
+        console.log('Start Date:', start);
+        console.log('End Date:', end);
+
+        for (let i = 1; i < tr.length; i++) {
+            let td = tr[i].getElementsByTagName("td");
+            let rowContainsSearchTerm = false;
+            let rowDateTimeStr = td[0].innerText.trim(); // Assuming the DateTime is in the first cell
+            let rowDateTime = parseCustomDateTime(rowDateTimeStr);
+
+            console.log('Row DateTime:', rowDateTime);
+            
+            // Check if the rowDateTime is within the start and end dates
+            let isWithinDateRange = true;
+            if (start && end) {
+                isWithinDateRange = rowDateTime >= start && rowDateTime <= end;
+            } else if (start) {
+                isWithinDateRange = rowDateTime >= start;
+            } else if (end) {
+                isWithinDateRange = rowDateTime <= end;
+            }
+
+            // Check if any cell contains the search term
+            for (let j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    if (td[j].innerText.toLowerCase().indexOf(input) > -1) {
+                        rowContainsSearchTerm = true;
+                        break;
+                    }
+                }
+            }
+
+            tr[i].style.display = (rowContainsSearchTerm && isWithinDateRange) ? "" : "none";
+        }
+    }
+
+    function parseCustomDateTime(dateTimeStr) {
+        console.log('Parsing DateTime:', dateTimeStr);
+        // Parse the custom date-time format "Aug. 23, 2024, 8:40 p.m"
+        let [datePart, timePart] = dateTimeStr.split(', ');
+        let [monthStr, day, year] = datePart.split(' ');
+        let [time, period] = timePart.split(' ');
+
+        // Convert month abbreviation to month index
+        let month = new Date(Date.parse(monthStr +" 1, 2012")).getMonth();
+
+        // Convert 12-hour time format to 24-hour format
+        let [hour, minute] = time.split(':');
+        hour = parseInt(hour, 10);
+        if (period === 'p.m' && hour !== 12) {
+            hour += 12;
+        } else if (period === 'a.m' && hour === 12) {
+            hour = 0;
+        }
+
+        // Create and return the Date object
+        let dateTime = new Date(year, month, day, hour, minute);
+        console.log('Parsed DateTime:', dateTime);
+        return dateTime;
+    }
+
+    function clearFilters() {
+        document.getElementById("stockSearch").value = "";
+        document.getElementById("startDate").value = "";
+        document.getElementById("endDate").value = "";
+        filterTable();
+    }
+</script>
+
+{% endblock %}

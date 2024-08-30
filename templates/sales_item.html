@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <style>
+        
+
+        .search-box {
+            display: flex;
+            margin: 8px;
+            margin-bottom: 10px;
+        }
+
+        .search-box input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 300px;
+            box-sizing: border-box;
+        }
+
+        .product-panel {
+            
+            max-height: 100%; /* Adjust the height as needed */
+            overflow-y: auto;
+            scrollbar-color:#2c3e50 white;
+            border-radius: 12px;
+            width: 100%;            
+            max-height: 90%;
+        }
+
+        .product-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+            padding: 5px;
+        }
+
+        .product-card {
+            
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 155px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .item-button {
+            border: none;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            /* align-items: center; */
+            text-align: center;
+        }
+
+        .item-button h2 {
+            font-size: 20px;
+            margin: 0 0 10px;
+            color: #2c3e50;
+        }
+
+        .item-button p {
+            margin: 5px 0;
+            color: #2c3e50;
+        }
+
+        .no-products {
+            text-align: center;
+            font-size: 18px;
+            color: #999;
+            margin-top: 30px;
+        }
+
+        /* Add media queries for responsiveness */
+        @media (max-width: 768px) {
+            .search-box {
+                margin: 10px;
+            }
+
+            .search-box input[type="text"] {
+                width: 100%;
+            }
+
+            .product-panel {
+                width: 100%;
+            }
+
+            .product-card {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="search-box">
+        <input type="text" id="productSearch" placeholder="Search products..." onkeyup="filterCards()" >
+    </div>
+
+    <div class="product-panel">
+        <div class="product-cards" id="productCards">
+            <!-- JavaScript will dynamically insert cards here -->
+        </div>
+        <p class="no-products" id="noProductsMessage">No products found.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchProducts();
+    
+            // Hide the "No products found" message by default
+            document.getElementById('noProductsMessage').style.display = 'none';
+        });
+    
+        function fetchProducts() {
+            fetch('/api/products/')
+                .then(response => response.json())
+                .then(data => {
+                    const products = data.products;
+                    const stockData = data.stock; // Assuming the stock data is provided in the API response
+                    const productCardsContainer = document.getElementById('productCards');
+    
+                    // Clear existing cards
+                    productCardsContainer.innerHTML = '';
+    
+                    if (products.length > 0) {
+                        products.forEach(product => {
+                            const card = document.createElement('div');
+                            card.className = 'product-card';
+                            card.dataset.productName = product.name; // Store product name in data attribute
+    
+                            // Retrieve total stock for the product
+                            const totalStock = stockData[product.name] ? stockData[product.name].quantity : 0;
+    
+                            card.innerHTML = `
+                                <button class="item-button">
+                                    <h2>${product.name}</h2>
+                                    <p>Price: ${product.price}</p>
+                                    <p class="stock-quantity">Total Stock: ${totalStock}</p>
+                                </button>
+                            `;
+                            
+                            card.addEventListener('click', () => {
+                                fetchProducts();
+                            });
+    
+                            productCardsContainer.appendChild(card);
+                        });
+    
+                        // Apply the filter after reloading products
+                        filterCards();
+                    } else {
+                        document.getElementById('noProductsMessage').style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error fetching products:', error));
+        }
+    
+        function filterCards() {
+            let input = document.getElementById("productSearch").value.toLowerCase();
+            let cards = document.getElementsByClassName("product-card");
+    
+            Array.from(cards).forEach(card => {
+                let productName = card.querySelector('h2').textContent.toLowerCase();
+                card.style.display = productName.includes(input) ? '' : 'none';
+            });
+    
+            // Display the "No products found" message if no cards are visible
+            let visibleCards = Array.from(cards).some(card => card.style.display === '');
+            document.getElementById('noProductsMessage').style.display = visibleCards ? 'none' : 'block';
+        }
+    </script>
+    
+</body>
+</html>

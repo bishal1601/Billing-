@@ -1,0 +1,215 @@
+{% extends "menubar.html" %}
+
+{% block title %}Add User{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Edit User</h1>
+    <form method="POST" onsubmit="return checkPasswords()">
+        {% csrf_token %}
+
+        {% if form.errors %}
+            <ul class="errorlist">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="first_name">First Name:</label>
+            {{ form.first_name }}
+        </div>
+
+        <div class="form-group">
+            <label for="last_name">Last Name:</label>
+            {{ form.last_name }}
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email:</label>
+            {{ form.email }}
+        </div>
+
+         <div class="form-group">
+            <label for="username">Username:</label>
+            {{ form.username }}
+        </div> 
+
+        <div class="form-group">
+            <label for="password">Password:</label>
+            {{ form.password }}
+        </div>
+
+        <div class="form-group">
+            <label for="confirm_password">Confirm Password:</label>
+            <input type="password" id="confirm_password" name="confirm_password">
+        </div>
+
+        <div class="form-group">
+            <div class="activeandcheck">
+                <div>
+                    <label for="status">Active:</label>
+                </div>
+                <div>
+                    {{ form.status }}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="javascript:history.back()" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-submit">Edit</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    body {
+        background-color: #f7f9fc;
+        font-family: Arial, sans-serif;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+
+    .form-container {
+        max-width: 400px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #ddd;
+    }
+
+    .form-container h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 2rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .form-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        width: 30%;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #555;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+        flex: 1;
+        padding: 0.6rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+        color: #333;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.2);
+        outline: none;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+    }
+    .btn-cancel {
+        width: 40%;
+        padding: 0.8rem;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+        border: none;
+    }
+
+    .btn-submit {
+        width: 48%;
+        padding: 0.8rem;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+        border: none;
+    }
+
+    .btn-submit {
+        background-color: green;
+        color: #ffffff;
+    }
+
+    .btn-submit:hover {
+        background-color: rgb(1, 105, 1);
+        transform: translateY(-2px);
+    }
+
+    .btn-submit:active {
+        background-color: rgb(1, 100, 1);
+        transform: translateY(0);
+    }
+
+    .btn-cancel {
+        background-color: #e74c3c;
+        color: #ffffff;
+    }
+
+    .btn-cancel:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+    }
+
+    .btn-cancel:active {
+        background-color: #96281b;
+        transform: translateY(0);
+    }
+
+    .errorlist {
+        color: red;
+        margin-bottom: 1.5rem;
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .activeandcheck {
+        display: flex;
+        gap: 60px;
+    }
+</style>
+
+<script>
+    function checkPasswords() {
+        var password = document.getElementById("id_password").value;
+        var confirmPassword = document.getElementById("confirm_password").value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return false;
+        }
+        return true;
+    }
+</script>
+{% endblock %}

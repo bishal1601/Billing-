@@ -1,0 +1,195 @@
+{% extends "menubar.html" %}
+
+{% block title %}Vendor List{% endblock %}
+
+{% block content %}
+<style>
+    .body_container {
+        max-width: 100%;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+    }
+    h1 {
+        font-size: 26px;
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 600;
+    }
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .search-box {
+        display: flex;
+        align-items: center;
+        max-width: 300px;
+        width: 100%;
+    }
+    .search-box input[type="text"] {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .add-button {
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: #fff;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+    .add-button:hover {
+        background-color: #218838;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    th, td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+    th {
+        background-color: #343a40;
+        color: #fff;
+        text-transform: uppercase;
+        font-size: 14px;
+        letter-spacing: 0.1em;
+    }
+    tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+    .status-active, .status-inactive {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        text-align: center;
+        display: inline-block;
+    }
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .edit-button {
+        padding: 8px 12px;
+        background-color: #007bff;
+        color: #fff;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+    .edit-button:hover {
+        background-color: #0056b3;
+    }
+    .edit-button i {
+        margin-right: 5px;
+    }
+    .no-vendors {
+        text-align: center;
+        font-size: 18px;
+        color: #999;
+        margin-top: 30px;
+    }
+</style>
+
+<div class="body_container">
+    <h1>Vendor List</h1>
+    <div class="header-row">
+        <div class="search-box">
+            <input type="text" id="vendorSearch" placeholder="Search vendors..." onkeyup="filterTable()">
+        </div>
+        <a href="/add_vendor/" class="add-button">Add Vendor</a>
+    </div>
+    {% if vendors %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Vendor Name</th>
+                    <th>Pan No.</th>
+                    <th>Address</th>
+                    <th>Contact</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vendor in vendors %}
+                <tr>
+                    <td>{{ vendor.vendor }}</td>
+                    <td>{{ vendor.panno }}</td>
+                    <td>{{ vendor.address }}</td>
+                    <td>{{ vendor.contact }}</td>
+                    <td>
+                        <span class="{% if vendor.status %}status-active{% else %}status-inactive{% endif %}">
+                            {% if vendor.status %}
+                                Active
+                            {% else %}
+                                Inactive
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="/update_vendor/{{ vendor.id }}" class="edit-button">
+                            <i class="fas fa-edit"></i>Edit
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="no-vendors">No vendors found.</p>
+    {% endif %}
+</div>
+
+<script>
+    function filterTable() {
+        let input = document.getElementById("vendorSearch");
+        let filter = input.value.toLowerCase();
+        let table = document.querySelector("table");
+        let tr = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < tr.length; i++) {
+            let td = tr[i].getElementsByTagName("td");
+            let rowContainsSearchTerm = false;
+
+            for (let j = 0; j < td.length - 1; j++) { // Skip the last column (Action)
+                if (td[j]) {
+                    if (td[j].innerHTML.toLowerCase().indexOf(filter) > -1) {
+                        rowContainsSearchTerm = true;
+                        break;
+                    }
+                }
+            }
+
+            tr[i].style.display = rowContainsSearchTerm ? "" : "none";
+        }
+    }
+</script>
+{% endblock %}
