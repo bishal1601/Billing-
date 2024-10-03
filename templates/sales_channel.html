@@ -1,18 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu</title>
     <style>
+        .search-box {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .search-box input[type="text"] {
+            margin-top: 15px;
+            margin-left: 25px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 300px;
+            box-sizing: border-box;
+        }
+
+        .product-panel {
+            max-height: 105%;
+            overflow-y: auto;
+            scrollbar-color: #81888f white;
+            border-radius: 12px;
+            width: 100%;
+            padding-left: 0px;
+        }
+
+        .product-panel-sales {
+            max-height: 100%;
+            overflow-y: auto;
+            scrollbar-color: #81888f white;
+            border-top-left-radius: 12px;
+
+            border-top-right-radius: 12px;
+            width: 100%;
+            height: 75%;
+            max-height: 86%;
+            padding-left: 0px;
+            background-color: rgb(255, 255, 255);
+        }
+
+        .product-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+            padding: 5px;
+            padding-left: 20px;
+        }
+
+        .product-card {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 155px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .item-button {
+            border: none;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .item-button h2 {
+            font-size: 20px;
+            margin: 0 0 10px;
+            color: #2c3e50;
+        }
+
+        .item-button p {
+            margin: 5px 0;
+            color: #2c3e50;
+        }
+
+        .no-products {
+            text-align: center;
+            font-size: 18px;
+            color: #999;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .search-box {
+                margin: 10px;
+            }
+
+            .search-box input[type="text"] {
+                width: 100%;
+            }
+
+            .product-panel {
+                width: 100%;
+            }
+
+            .product-card {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        .table-container {
+            width: 80%;
+            max-width: 900px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4675a1;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        td {
+            background-color: #ffffff;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
         body {
+            overflow: hidden;
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             height: 100vh;
             font-family: Arial, sans-serif;
-            background-color: #2c3e50;
+            background-color: #c2d0dd;
         }
 
         .main-container {
@@ -23,23 +174,15 @@
 
         .menu-container {
             width: 70%;
-            height: 100%;
 
         }
 
         .sales-container {
-            background-color: #ffffff; /* White background */
             width: 30%;
-            height: 96.5%;
-            margin-right: 10px;
-            margin-left: 5px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            background-color: #2c3e50;
 
-            border-radius: 10px;
-            border: 1px solid rgb(109, 109, 109);
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);        }
+
+        }
+
 
         .menu-item {
             width: 98%;
@@ -47,36 +190,534 @@
             margin: 10px;
 
             border-radius: 10px;
-            background-color: #2c3e50;
+            background-color: #c2d0dd;
 
         }
 
-        .menu-functions {
-            background-color: #2c3e50;
-            width: 98%;
-            height: 14%;
-            border: 3px groove rgb(255, 255, 255);
+        .decrease {
+            max-width: 1px;
+        }
 
+        .itemname {
+            width: 80px;
+            max-width: 80px;
+            overflow: hidden;
+        }
+
+        .qty {
+            width: 5px;
+            max-width: 2px;
+            overflow: hidden;
+        }
+
+        .cancel-button {
+            background-color: #DA4444;
+            color: #fff;
+            width: 150px;
+            /* Adjust width as needed */
+            height: 45px;
+            /* Adjust height as needed */
+            border: none;
+            border-radius: 5px;
+            /* Add rounded corners */
+            cursor: pointer;
+            font-size: 16px;
+            /* Adjust font size */
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            /* Add a subtle shadow */
+            transition: background-color 0.3s, transform 0.3s;
+            /* Smooth transitions */
+            margin-top: 10px;
+        }
+
+        .cancel-button:hover {
+            background-color: #c0392b;
+            /* Darken on hover */
+            transform: translateY(-2px);
+            /* Lift effect */
+        }
+
+        .cancel-button:active {
+            background-color: #a93226;
+            /* Even darker on click */
+            transform: translateY(1px);
+            /* Pressed effect */
+        }
+
+        .complete-button {
+            background-color: #4675a1;
+            color: #fff;
+            width: 250px;
+            /* Adjust width as needed */
+            height: 45px;
+            /* Adjust height as needed */
+            border: none;
+            border-radius: 5px;
+            /* Add rounded corners */
+            cursor: pointer;
+            font-size: 16px;
+            /* Adjust font size */
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            /* Add a subtle shadow */
+            transition: background-color 0.3s, transform 0.3s;
+            /* Smooth transitions */
+        }
+
+        .complete-button:hover {
+            background-color: #4675a1;
+            /* Darken on hover */
+            transform: translateY(-2px);
+            /* Lift effect */
+        }
+
+        .complete-button:active {
+            background-color: #4675a1;
+            /* Even darker on click */
+            transform: translateY(1px);
+            /* Pressed effect */
+        }
+
+        /* CSS Styling */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-button {
             margin: 10px;
-            border-radius: 10px;
-            box-shadow: 4 4px 4px 4px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);        }
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .cash {
+            width: 100px;
+            height: 70px;
+            background-color: #4675a1;
+            color: white;
+        }
+
+        .fonepay {
+            width: 100px;
+            height: 70px;
+            background-color: #4675a1;
+            color: white;
+        }
+
+        .visa {
+            background-color: #4675a1;
+            color: white;
+            width: 100px;
+            height: 70px;
+        }
+
+        .payment-button:hover {
+            opacity: 0.8;
+        }
+
+        .close-button {
+            width: 95%;
+            height: 50px;
+            margin-top: 15px;
+            padding: 5px 15px;
+            cursor: pointer;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .close-button:hover {
+            background-color: #c9302c;
+        }
+        .total_amount{
+            display: flex;
+            background-color: white;
+            border-end-start-radius: 12px;
+            border-end-end-radius: 12px;
+
+            padding: 5px;
+            
+        }
+        .total-amount-text{
+            
+            width: 50%;
+        }
+        .total-amount-diaplay{
+            
+            width: 50%;
+            text-align: end;
+            padding-right: 15px;
+        }
+     
     </style>
 </head>
+
 <body>
+    <div class="search-box">
+        <input type="text" id="productSearch" placeholder="Search products..." onkeyup="filterCards()">
+    </div>
     <div class="main-container">
         <div class="menu-container">
-            
+
             <div class="menu-item">
-                {% include 'sales_item.html' %}  
+
+
+                <div class="product-panel">
+                    <div class="product-cards" id="productCards">
+                    </div>
+                </div>
             </div>
-            <div class="menu-functions">
-                {% include 'sales_container.html' %}  
-            </div>
-        </div> 
-        
+
+
+        </div>
+
         <div class="sales-container">
-            <!-- Sales content goes here -->
+
+            <div class="product-panel-sales">
+
+                <table id="sales-panel">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th></th>
+                            <th>Qty</th>
+                            <th></th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="holdItemsBody">
+                        <!-- Items will be dynamically inserted here -->
+                    </tbody>
+                    
+                </table>
+                
+            </div>
+            <div class="total_amount" >
+                <div class="total-amount-text">
+                    Total Amount 
+                </div>
+                <div class="total-amount-diaplay">
+                </div>
+            </div>
+
+
+            <button class="complete-button" onclick="showPaymentOptions()">Finish</button>
+
+            <!-- Popup Container -->
+            <div id="paymentPopup" class="popup-overlay" style="display: none;">
+                <div class="popup-content">
+                    <h3>Select Payment Option</h3>
+                    <button class="payment-button cash" data-amount="100">Cash</button>
+<button class="payment-button fonepay" data-amount="100">Fonepay</button>
+<button class="payment-button visa" data-amount="100">Visa</button><br>
+                    <button class="close-button" onclick="closePopup()">Close</button>
+                </div>
+            </div> <button class="cancel-button" onclick="deleteHoldItems();">Clear</button>
         </div>
     </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+    <script>
+
+
+        function closePopup() {
+            document.getElementById('paymentPopup').style.display = 'none';
+        }
+        document.querySelector('.complete-button').addEventListener('click', () => {
+            // Check if the table has any rows
+            const tableBody = document.getElementById('holdItemsBody');
+            if (tableBody.children.length > 0) {
+                // Create the popup container
+                const popupContainer = document.createElement('div');
+                popupContainer.classList.add('popup-container');
+
+                // Create the popup content
+                const popupContent = document.createElement('div');
+                popupContent.classList.add('popup-content');
+
+                // Add payment options buttons
+                const cashButton = document.createElement('button');
+                cashButton.innerText = 'Cash';
+                cashButton.classList.add('payment-button');
+
+                const fonepayButton = document.createElement('button');
+                fonepayButton.innerText = 'Fonepay';
+                fonepayButton.classList.add('payment-button');
+
+                const visaButton = document.createElement('button');
+                visaButton.innerText = 'Visa';
+                visaButton.classList.add('payment-button');
+
+                // Append buttons to the popup content
+                popupContent.appendChild(cashButton);
+                popupContent.appendChild(fonepayButton);
+                popupContent.appendChild(visaButton);
+
+                // Append the popup content to the popup container
+                popupContainer.appendChild(popupContent);
+                document.body.appendChild(popupContainer);
+
+                // Close the popup when clicking outside of it
+                popupContainer.addEventListener('click', (event) => {
+                    if (event.target === popupContainer) {
+                        document.body.removeChild(popupContainer);
+                    }
+                });
+                document.getElementById('paymentPopup').style.display = 'flex';
+
+            } else {
+                alert('Please add items before completing the transaction.');
+            }
+        });
+
+        function fetchHoldItems() {
+    fetch('/api/get_hold_items/')
+        .then(response => response.json())
+        .then(data => {
+            const holdItems = data.holdItems;
+            const tableBody = document.getElementById('holdItemsBody');
+            const totalAmountDisplay = document.querySelector('.total-amount-diaplay');
+
+            tableBody.innerHTML = ''; // Clear any existing rows
+            let totalAmount = 0;
+
+            if (holdItems.length > 0) {
+                holdItems.forEach(item => {
+                    const row = document.createElement('tr');
+
+                    const itemTotal = item.price * item.quantity;
+                    totalAmount += itemTotal;
+
+                    row.innerHTML = `
+                        <td class="itemname">${item.name}</td>
+                        <td class="decrease"><button onclick="updateQuantity('${item.name}', 'decrease')">-</button></td> 
+                        <td class="qty">${item.quantity}</td> 
+                        <td class="increase"><button onclick="updateQuantity('${item.name}', 'increase')">+</button></td>
+                        <td>${item.price}</td>
+                        <td>${itemTotal}</td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+
+                // Update the total amount display
+                totalAmountDisplay.textContent = totalAmount;
+            } else {
+                totalAmountDisplay.textContent = '0'; // Reset to 0 if no items
+            }
+        })
+        .catch(error => console.error('Error fetching hold items:', error));
+}
+
+
+
+        function updateQuantity(productName, action) {
+            fetch('/api/update_hold_item/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: `product_name=${encodeURIComponent(productName)}&action=${encodeURIComponent(action)}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        fetchHoldItems(); // Refresh the list
+                    } else {
+                        console.error(data.message);
+                    }
+                })
+                .catch(error => console.error('Error updating item quantity:', error));
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+
+        function deleteHoldItems() {
+            console.log("Attempting to delete hold items...");  // Debugging log
+            fetch('/api/delete_hold_items/', {  // Update this URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',  // Include CSRF token for safety
+                },
+                body: JSON.stringify({}),
+            })
+                .then(response => {
+                    console.log("Response received:", response);  // Debugging log
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Data received:", data);  // Debugging log
+                    if (data.success) {
+                        console.log(data.message); // Log the success message
+                    } else {
+                        console.error(data.message); // Log any error message
+                    }
+                    fetchHoldItems();
+                })
+                .catch(error => console.error('Error:', error));
+
+        }
+
+        // Call the delete function when the page loads or reloads
+        window.onload = function () {
+            deleteHoldItems();
+            fetchProducts();
+
+        };
+
+
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchProducts();
+            document.getElementById('noProductsMessage').style.display = 'none';
+        });
+
+        function fetchProducts() {
+            fetch('/api/products/')
+                .then(response => response.json())
+                .then(data => {
+                    const products = data.products;
+                    const stockData = data.stock;
+                    const productCardsContainer = document.getElementById('productCards');
+
+                    productCardsContainer.innerHTML = '';
+
+                    if (products.length > 0) {
+                        products.forEach(product => {
+                            const card = document.createElement('div');
+                            card.className = 'product-card';
+                            card.dataset.productName = product.name;
+
+                            const totalStock = stockData[product.name] ? stockData[product.name].quantity : 0;
+
+                            card.innerHTML = `
+                                        <button class="item-button">
+                                            <h2>${product.name}</h2>
+                                            <p>Price: ${product.price}</p>
+                                            <p class="stock-quantity">Total Stock: ${totalStock}</p>
+                                            <input type="hidden" id="quantity-${product.name}" value="1" min="1" style="width: 60px; text-align: center;" visable="false">
+                                        </button>
+                                    `;
+
+                            card.addEventListener('click', () => {
+                                const quantity = document.getElementById(`quantity-${product.name}`).value;
+                                const price = product.price; // Get the product price
+
+                                fetch('/api/add_to_holdsale/', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                        'X-CSRFToken': getCookie('csrftoken')
+                                    },
+                                    body: `product_name=${encodeURIComponent(product.name)}&quantity=${encodeURIComponent(quantity)}&price=${encodeURIComponent(price)}`
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            console.log("Product added to holdsale");
+                                        } else {
+                                            console.error(data.message);
+                                        }
+
+                                        fetchProducts();
+                                        fetchHoldItems();
+                                    })
+                                    .catch(error => console.error('Error:', error));
+                            });
+
+
+                            productCardsContainer.appendChild(card);
+                        });
+
+                        filterCards();
+                    } else {
+                        document.getElementById('noProductsMessage').style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error fetching products:', error));
+        }
+
+        function filterCards() {
+            let input = document.getElementById("productSearch").value.toLowerCase();
+            let cards = document.getElementsByClassName("product-card");
+
+            Array.from(cards).forEach(card => {
+                let productName = card.querySelector('h2').textContent.toLowerCase();
+                card.style.display = productName.includes(input) ? '' : 'none';
+            });
+
+            let visibleCards = Array.from(cards).some(card => card.style.display === '');
+            document.getElementById('noProductsMessage').style.display = visibleCards ? 'none' : 'block';
+        }
+
+        $(document).ready(function() {
+    $('.payment-button').on('click', function() {
+        var mode = $(this).attr('class').split(' ')[1];
+        var amount = $(this).data('amount');
+
+        $.ajax({
+            url: '/save-collection-sale/',
+            type: 'POST',
+            data: {
+                amount: amount,
+                mode: mode,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                alert('Payment saved successfully!');
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+                console.error('Response Text:', xhr.responseText);
+                alert('Error saving payment: ' + error);
+            }
+        });
+    });
+});
+    </script>
 </body>
+
 </html>

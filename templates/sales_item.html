@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product List</title>
     <style>
-        
-
         .search-box {
             display: flex;
             margin: 8px;
@@ -23,10 +21,9 @@
         }
 
         .product-panel {
-            
-            max-height: 100%; /* Adjust the height as needed */
+            max-height: 100%;
             overflow-y: auto;
-            scrollbar-color:#2c3e50 white;
+            scrollbar-color: #2c3e50 white;
             border-radius: 12px;
             width: 100%;            
             max-height: 90%;
@@ -40,7 +37,6 @@
         }
 
         .product-card {
-            
             background-color: #ffffff;
             border: 1px solid #ddd;
             border-radius: 10px;
@@ -63,7 +59,6 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
-            /* align-items: center; */
             text-align: center;
         }
 
@@ -85,7 +80,6 @@
             margin-top: 30px;
         }
 
-        /* Add media queries for responsiveness */
         @media (max-width: 768px) {
             .search-box {
                 margin: 10px;
@@ -108,7 +102,7 @@
 </head>
 <body>
     <div class="search-box">
-        <input type="text" id="productSearch" placeholder="Search products..." onkeyup="filterCards()" >
+        <input type="text" id="productSearch" placeholder="Search products..." onkeyup="filterCards()">
     </div>
 
     <div class="product-panel">
@@ -119,49 +113,100 @@
     </div>
 
     <script>
+
+function deleteHoldItems() {
+    console.log("Attempting to delete hold items...");  // Debugging log
+    fetch('/api/delete_hold_items/', {  // Update this URL
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}',  // Include CSRF token for safety
+        },
+        body: JSON.stringify({}),
+    })
+    .then(response => {
+        console.log("Response received:", response);  // Debugging log
+        return response.json();
+    })
+    .then(data => {
+        console.log("Data received:", data);  // Debugging log
+        if (data.success) {
+            console.log(data.message); // Log the success message
+        } else {
+            console.error(data.message); // Log any error message
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Call the delete function when the page loads or reloads
+window.onload = function() {
+    deleteHoldItems();
+    fetchProducts();
+
+};
+
+
+
+
         document.addEventListener('DOMContentLoaded', () => {
             fetchProducts();
-    
-            // Hide the "No products found" message by default
             document.getElementById('noProductsMessage').style.display = 'none';
         });
-    
+
         function fetchProducts() {
             fetch('/api/products/')
                 .then(response => response.json())
                 .then(data => {
                     const products = data.products;
-                    const stockData = data.stock; // Assuming the stock data is provided in the API response
+                    const stockData = data.stock;
                     const productCardsContainer = document.getElementById('productCards');
-    
-                    // Clear existing cards
+
                     productCardsContainer.innerHTML = '';
-    
+
                     if (products.length > 0) {
                         products.forEach(product => {
                             const card = document.createElement('div');
                             card.className = 'product-card';
-                            card.dataset.productName = product.name; // Store product name in data attribute
-    
-                            // Retrieve total stock for the product
+                            card.dataset.productName = product.name;
+
                             const totalStock = stockData[product.name] ? stockData[product.name].quantity : 0;
-    
+
                             card.innerHTML = `
                                 <button class="item-button">
                                     <h2>${product.name}</h2>
                                     <p>Price: ${product.price}</p>
                                     <p class="stock-quantity">Total Stock: ${totalStock}</p>
+                                    <input type="hidden" id="quantity-${product.name}" value="1" min="1" style="width: 60px; text-align: center;" visable="false">
                                 </button>
                             `;
-                            
+
                             card.addEventListener('click', () => {
-                                fetchProducts();
+                                const quantity = document.getElementById(`quantity-${product.name}`).value;
+
+                                fetch('/api/add_to_holdsale/', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                        'X-CSRFToken': getCookie('csrftoken')
+                                    },
+                                    body: `product_name=${encodeURIComponent(product.name)}&quantity=${encodeURIComponent(5)}`
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        console.log("Product added to holdsale");
+                                    } else {
+                                        console.error(data.message);
+                                    }
+                                    fetchProducts();
+                                })
+                                .catch(error => console.error('Error:', error));
                             });
-    
+
                             productCardsContainer.appendChild(card);
                         });
-    
-                        // Apply the filter after reloading products
+
                         filterCards();
                     } else {
                         document.getElementById('noProductsMessage').style.display = 'block';
@@ -169,21 +214,34 @@
                 })
                 .catch(error => console.error('Error fetching products:', error));
         }
-    
+
         function filterCards() {
             let input = document.getElementById("productSearch").value.toLowerCase();
             let cards = document.getElementsByClassName("product-card");
-    
+
             Array.from(cards).forEach(card => {
                 let productName = card.querySelector('h2').textContent.toLowerCase();
                 card.style.display = productName.includes(input) ? '' : 'none';
             });
-    
-            // Display the "No products found" message if no cards are visible
+
             let visibleCards = Array.from(cards).some(card => card.style.display === '');
             document.getElementById('noProductsMessage').style.display = visibleCards ? 'none' : 'block';
         }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
     </script>
-    
 </body>
 </html>

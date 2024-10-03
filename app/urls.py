@@ -25,4 +25,12 @@ urlpatterns = [
     path('expiry_report/', views.expiry_report),
     path('sales_channel/', views.sales_channel),
     path('api/products/', views.api_products, name='product_list_api'),
+    path('api/add_to_holdsale/', views.add_to_holdsale, name='add_to_holdsale'),
+    path('api/delete_hold_items/', views.delete_hold_items, name='delete_hold_items'),
+    path('api/get_hold_items/', views.get_hold_items, name='get_hold_items'),
+    path('api/update_hold_item/', views.update_hold_item, name='update_hold_item_quantity'),
+    path('save-collection-sale/', views.save_collection_sale, name='save_collection_sale'),
+
+
+
 ]

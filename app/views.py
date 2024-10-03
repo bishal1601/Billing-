@@ -1,3 +1,4 @@
+import json
 from pyexpat.errors import messages
 from sqlite3 import IntegrityError
 from django.http import HttpResponse
@@ -8,6 +9,8 @@ from app.models import Product, Stock, StockMovement, Unit, Vendor
 from django.db.models.aggregates import Sum
 
 from django.http.response import JsonResponse
+
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 def home(request):
@@ -262,7 +265,7 @@ def sales_channel(request):
     return render(request,'sales_channel.html')
 
 from django.http import JsonResponse
-from .models import Product, StockMovement
+from .models import Collectionsale, Holdsale, Product, StockMovement
 
 def api_products(request):
     products = Product.objects.filter(status=True)
@@ -288,7 +291,8 @@ def api_products(request):
             stock_data[movement.name]['quantity'] += movement.quantity
         elif movement.channel == 'Damage':
             stock_data[movement.name]['quantity'] -= movement.quantity
-
+        elif movement.channel == 'Hold':
+            stock_data[movement.name]['quantity'] -= movement.quantity
     products_list = list(products.values('name', 'price'))
 
     # Prepare response data
@@ -298,3 +302,102 @@ def api_products(request):
     }
 
     return JsonResponse(response_data)
+
+@csrf_exempt
+def add_to_holdsale(request):
+    if request.method == 'POST':
+        product_name = request.POST.get('product_name')
+        quantity = 1  # Assuming quantity is always 1 for hold
+        price = request.POST.get('price')
+
+        try:
+            # Check if the item already exists with channel "Hold"
+            stock_movement_entry = StockMovement.objects.filter(name=product_name, channel="Hold").first()
+
+            if stock_movement_entry:
+                # If the item exists, increase the quantity by 1
+                stock_movement_entry.quantity += 1
+                stock_movement_entry.save()
+            else:
+                # If the item doesn't exist, create a new entry
+                StockMovement.objects.create(
+                    name=product_name,
+                    quantity=quantity,
+                    channel="Hold",
+                    price=float(price)  # Save the price field
+                )
+
+            return JsonResponse({'success': True, 'message': 'Product added to holdsale'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+@csrf_exempt
+def delete_hold_items(request):
+    if request.method == 'POST':
+        try:
+            # Delete all items where the channel is 'Hold'
+            deleted_count, _ = StockMovement.objects.filter(channel='Hold').delete()
+            if deleted_count > 0:
+                return JsonResponse({'success': True, 'message': f'Deleted {deleted_count} items with channel "Hold"'})
+            else:
+                return JsonResponse({'success': False, 'message': 'No items found to delete'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+def get_hold_items(request):
+    hold_items = StockMovement.objects.filter(channel='Hold').values('name', 'quantity', 'unit','price')
+    items_list = list(hold_items)  # Convert queryset to list
+    return JsonResponse({'holdItems': items_list})
+
+@csrf_exempt
+def update_hold_item(request):
+    if request.method == 'POST':
+        product_name = request.POST.get('product_name')
+        action = request.POST.get('action')
+
+        try:
+            item = StockMovement.objects.get(name=product_name, channel="Hold")
+
+            if action == 'decrease':
+                if item.quantity > 1:
+                    item.quantity -= 1
+                    item.save()
+                else:
+                    item.delete()
+            elif action == 'increase':
+                item.quantity += 1
+                item.save()
+
+            return JsonResponse({'success': True, 'message': 'Item updated successfully'})
+        except StockMovement.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Item not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+
+@csrf_exempt
+def save_collection_sale(request):
+    if request.method == 'POST':
+        amount = request.POST.get('amount')
+        mode = request.POST.get('mode')
+
+        print(f'Received Amount: {amount}, Mode: {mode}')
+
+        try:
+            amount = float(amount)
+            collection_sale = Collectionsale(amount=amount, mode=mode)
+            collection_sale.save()
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            print(f'Error saving to CollectionSale: {e}')
+            return JsonResponse({'status': 'failed', 'error': str(e)}, status=400)
+    return JsonResponse({'status': 'failed'}, status=400)

@@ -77,6 +77,7 @@ class StockMovement(models.Model):
     
     opid = models.IntegerField(null=True,blank=True)
     quantity = models.IntegerField()  # Store the stock quantity
+    price=models.IntegerField(null=True,blank=True)
     unit = models.CharField(max_length=255,choices=Unit.get_unit_choices) # Store the unit associated with the product (e.g., pieces, kilograms)
     channel = models.CharField(max_length=20)  # Store the channel through which the stock movement occurred (e.g., online, in-store)
     invoice=models.IntegerField(blank=True, null=True)
@@ -94,3 +95,32 @@ class StockMovement(models.Model):
         super().save(*args, **kwargs)
 
 
+class Holdsale(models.Model):
+    date = models.DateTimeField(auto_now_add=True)  # Automatically set the date when the record is first created
+    name = models.CharField(max_length=255,choices=Product.get_product_choices)
+    
+    opid = models.IntegerField(null=True,blank=True)
+    quantity = models.IntegerField()  # Store the stock quantity
+    unit = models.CharField(max_length=255,choices=Unit.get_unit_choices) # Store the unit associated with the product (e.g., pieces, kilograms)
+    channel = models.CharField(max_length=20,blank=True,null=True)  # Store the channel through which the stock movement occurred (e.g., online, in-store)
+    invoice=models.IntegerField(blank=True, null=True)
+    User = models.ForeignKey(User, on_delete=models.CASCADE, default=1, blank=True, null=True)
+    vendor=models.CharField(max_length=255,choices=Vendor.get_vendor_choices, null=True,blank=True)
+    pdate=models.DateField(null=True,blank=True)
+    sdate=models.DateField(auto_now_add=True,null=True,blank=True)
+
+
+
+    def __str__(self):
+        return f"{self.name} - {self.quantity} {self.unit} on {self.date}"
+    def save(self, *args, **kwargs):
+       
+        super().save(*args, **kwargs)
+
+
+class Collectionsale(models.Model):
+    date = models.DateTimeField(auto_now_add=True)  # Automatically set the date when the record is first created
+    amount=models.FloatField()
+    mode=models.CharField(max_length=255)
+    def __str__(self):
+        return f"{self.date}"

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Stock, StockMovement, Unit, Product, Vendor
+from .models import Stock, StockMovement, Unit, Product, Vendor,Holdsale,Collectionsale
 
 class UnitAdmin(admin.ModelAdmin):
     list_display = ('FullName', 'ShortName', 'Status','User')  # Fields to display in list view
@@ -13,4 +13,7 @@ admin.site.register(Unit, UnitAdmin)
 admin.site.register(Product)
 # admin.site.register(Stock)
 admin.site.register(StockMovement)
+
+# admin.site.register(Holdsale)
 admin.site.register(Vendor)
+admin.site.register(Collectionsale)
