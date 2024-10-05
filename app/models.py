@@ -85,11 +85,12 @@ class StockMovement(models.Model):
     vendor=models.CharField(max_length=255,choices=Vendor.get_vendor_choices, null=True,blank=True)
     pdate=models.DateField(null=True,blank=True)
     sdate=models.DateField(auto_now_add=True,null=True,blank=True)
+    payment=models.CharField(max_length=20,null=True,blank=True)
 
 
 
     def __str__(self):
-        return f"{self.name} - {self.quantity} {self.unit} on {self.date}"
+        return f"{self.name} - {self.quantity}{self.channel} {self.unit} on {self.date}"
     def save(self, *args, **kwargs):
        
         super().save(*args, **kwargs)

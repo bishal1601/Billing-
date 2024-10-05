@@ -22,7 +22,7 @@ def purchase_report(request):
     return render(request, 'purchase_report.html', {'stockmovements': stockmovements})
 
 def sales_report(request):
-    stockmovements = StockMovement.objects.filter(channel='Sale')
+    stockmovements = StockMovement.objects.filter(channel='Sale').order_by('-date')
     
     return render(request, 'sales_report.html', {'stockmovements': stockmovements})
 
@@ -102,7 +102,10 @@ def stock_report(request):
 
 
 def collection_report(request):
-    return render(request, 'collection_report.html')
+    stockmovements = StockMovement.objects.filter(channel='Sale')
+    
+    return render(request, 'collection_report.html', {'stockmovements': stockmovements})
+    
 
 def add_purchase (request):
     return render(request,'add_purchase.html')
@@ -401,3 +404,142 @@ def save_collection_sale(request):
             print(f'Error saving to CollectionSale: {e}')
             return JsonResponse({'status': 'failed', 'error': str(e)}, status=400)
     return JsonResponse({'status': 'failed'}, status=400)
+
+
+def update_channel_and_invoice(request):
+    if request.method == "POST":
+        # Step 1: Get the last invoice number, if any
+        last_invoice = StockMovement.objects.exclude(invoice__isnull=True).order_by('-invoice').first()
+
+        # Step 2: Determine the next invoice number
+        next_invoice_number = last_invoice.invoice + 1 if last_invoice else 1  # Default starting invoice number if no previous invoice exists
+
+        # Step 3: Get the stock movements with channel 'Hold' to retain unit information
+        hold_movements = StockMovement.objects.filter(channel='Hold')
+
+        if not hold_movements.exists():
+            # If no hold movements are found, log or handle the case as necessary
+            return redirect('/sales_channel/')  # Redirect back if there are no movements
+
+        # Create a mapping of product names to their respective units
+        product_units = {}
+        for movement in hold_movements:
+            # Get the product associated with this movement
+            product = Product.objects.filter(name=movement.name).first()
+            if product:
+                product_units[movement.name] = product.unit
+
+        # Step 4: Update all rows where the channel is 'Hold'
+        updated_count = 0
+        for movement in hold_movements:
+            movement.channel = 'Sale'
+            movement.invoice = next_invoice_number
+            movement.payment='Cash'
+            
+            # Set the unit to the previously stored unit if it exists in the mapping
+            movement.unit = product_units.get(movement.name, movement.unit)
+            
+            # Save the movement and check for successful update
+            if movement.save():
+                updated_count += 1  # Increment count of updated rows
+
+        # Optional: Log the number of updated rows for debugging
+
+        # Redirect to the sales_channel page to reload it
+        return redirect('/sales_channel/')
+
+    # For GET requests or others, simply reload the page as well
+    return redirect('/sales_channel/')
+
+
+
+def update_channel_and_invoice_fonepay(request):
+    if request.method == "POST":
+        # Step 1: Get the last invoice number, if any
+        last_invoice = StockMovement.objects.exclude(invoice__isnull=True).order_by('-invoice').first()
+
+        # Step 2: Determine the next invoice number
+        next_invoice_number = last_invoice.invoice + 1 if last_invoice else 1  # Default starting invoice number if no previous invoice exists
+
+        # Step 3: Get the stock movements with channel 'Hold' to retain unit information
+        hold_movements = StockMovement.objects.filter(channel='Hold')
+
+        if not hold_movements.exists():
+            # If no hold movements are found, log or handle the case as necessary
+            return redirect('/sales_channel/')  # Redirect back if there are no movements
+
+        # Create a mapping of product names to their respective units
+        product_units = {}
+        for movement in hold_movements:
+            # Get the product associated with this movement
+            product = Product.objects.filter(name=movement.name).first()
+            if product:
+                product_units[movement.name] = product.unit
+
+        # Step 4: Update all rows where the channel is 'Hold'
+        updated_count = 0
+        for movement in hold_movements:
+            movement.channel = 'Sale'
+            movement.invoice = next_invoice_number
+            movement.payment='Fonepay'
+            
+            # Set the unit to the previously stored unit if it exists in the mapping
+            movement.unit = product_units.get(movement.name, movement.unit)
+            
+            # Save the movement and check for successful update
+            if movement.save():
+                updated_count += 1  # Increment count of updated rows
+
+        # Optional: Log the number of updated rows for debugging
+
+        # Redirect to the sales_channel page to reload it
+        return redirect('/sales_channel/')
+
+    # For GET requests or others, simply reload the page as well
+    return redirect('/sales_channel/')
+
+
+def update_channel_and_invoice_card(request):
+    if request.method == "POST":
+        # Step 1: Get the last invoice number, if any
+        last_invoice = StockMovement.objects.exclude(invoice__isnull=True).order_by('-invoice').first()
+
+        # Step 2: Determine the next invoice number
+        next_invoice_number = last_invoice.invoice + 1 if last_invoice else 1  # Default starting invoice number if no previous invoice exists
+
+        # Step 3: Get the stock movements with channel 'Hold' to retain unit information
+        hold_movements = StockMovement.objects.filter(channel='Hold')
+
+        if not hold_movements.exists():
+            # If no hold movements are found, log or handle the case as necessary
+            return redirect('/sales_channel/')  # Redirect back if there are no movements
+
+        # Create a mapping of product names to their respective units
+        product_units = {}
+        for movement in hold_movements:
+            # Get the product associated with this movement
+            product = Product.objects.filter(name=movement.name).first()
+            if product:
+                product_units[movement.name] = product.unit
+
+        # Step 4: Update all rows where the channel is 'Hold'
+        updated_count = 0
+        for movement in hold_movements:
+            movement.channel = 'Sale'
+            movement.invoice = next_invoice_number
+            movement.payment='Card'
+            
+            # Set the unit to the previously stored unit if it exists in the mapping
+            movement.unit = product_units.get(movement.name, movement.unit)
+            
+            # Save the movement and check for successful update
+            if movement.save():
+                updated_count += 1  # Increment count of updated rows
+
+        # Optional: Log the number of updated rows for debugging
+
+        # Redirect to the sales_channel page to reload it
+        return redirect('/sales_channel/')
+
+    # For GET requests or others, simply reload the page as well
+    return redirect('/sales_channel/')

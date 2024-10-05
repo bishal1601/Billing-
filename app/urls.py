@@ -29,8 +29,9 @@ urlpatterns = [
     path('api/delete_hold_items/', views.delete_hold_items, name='delete_hold_items'),
     path('api/get_hold_items/', views.get_hold_items, name='get_hold_items'),
     path('api/update_hold_item/', views.update_hold_item, name='update_hold_item_quantity'),
-    path('save-collection-sale/', views.save_collection_sale, name='save_collection_sale'),
-
+    path('update-channel/', views.update_channel_and_invoice, name='update_channel_to_sale'),
+    path('update-channel-fonepay/', views.update_channel_and_invoice_fonepay, name='update_channel_to_sale_fonepay'),
+    path('update-channel-card/', views.update_channel_and_invoice_card, name='update_channel_to_sale_card'),
 
 
 ]

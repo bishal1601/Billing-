@@ -1,8 +1,322 @@
 {% extends "menubar.html" %}
 
-{% block title %}Collection Report{% endblock %}
+{% block title %}Sales Report{% endblock %}
 
 {% block content %}
-    <h1>Collection Report</h1>
-    <p>This is where the collection report content will go.</p>
+<style>
+    .body_container {
+        max-width: 100%;
+        margin: auto;
+        padding: 30px;
+    }
+    h1 {
+        font-size: 32px;
+        color: #444;
+        text-align: center;
+        margin-bottom: 25px;
+        font-weight: 700;
+    }
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .search-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        gap: 10px;
+    }
+    .search-box input[type="text"], 
+    .search-box input[type="date"] {
+        padding: 10px 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+        width: 100%;
+        box-sizing: border-box;
+        transition: border-color 0.3s, background-color 0.3s, box-shadow 0.3s;
+    }
+    .search-box input[type="date"] {
+        max-width: 200px;
+        background-color: #fff;
+    }
+    .search-box input[type="date"]:hover,
+    .search-box input[type="text"]:hover {
+        border-color: #bbb;
+    }
+    .search-box input[type="date"]:focus,
+    .search-box input[type="text"]:focus {
+        border-color: #007bff;
+        background-color: #fff;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+    }
+    .date-label {
+        font-size: 14px;
+        margin-right: 8px;
+        font-weight: 600;
+        color: #333;
+    }
+    .button-container {
+        display: flex;
+        gap: 10px;
+    }
+    button {
+        padding-left: 8px;
+        padding-right: 8px;
+        height: 40px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+    button:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+    button:active {
+        transform: scale(1);
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #ddd;
+        text-align: center;
+    }
+    th {
+        background-color: #343a40;
+        color: #fff;
+        text-transform: uppercase;
+        font-size: 14px;
+        letter-spacing: 0.1em;
+    }
+    tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+    .no-products {
+        text-align: center;
+        font-size: 18px;
+        color: #999;
+        margin-top: 30px;
+    }
+
+    /* Grand total row styling */
+    tfoot {
+        font-weight: bold;
+        background-color: #e9ecef;
+        color: #333;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        th, td {
+            padding: 10px 12px;
+            font-size: 12px;
+        }
+        .search-box input[type="text"],
+        .search-box input[type="date"],
+        button {
+            font-size: 12px;
+            padding: 8px;
+        }
+    }
+</style>
+
+<div class="body_container">
+    <h1>Daily Collection Report</h1>
+    <div class="header-row">
+        <div class="search-box">
+            <input type="text" id="stockSearch" placeholder="Search ..." onkeyup="filterTable()" aria-label="Search Stock">
+            <span class="date-label">From:</span>
+            <input type="date" id="startDate" onchange="filterTable()" aria-label="Start Date" value="today">
+            <span class="date-label">To:</span>
+            <input type="date" id="endDate" onchange="filterTable()" aria-label="End Date">
+            <button onclick="clearFilters()">Clear</button>
+        </div>
+    </div>
+
+    {% if stockmovements %}
+    <table id="stockTable">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Invoice</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Price</th> <!-- Price Column -->
+                <th>Total</th> <!-- Total Column -->
+                <th>Payment Method</th>
+                <th>User</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movement in stockmovements %}
+            <tr>
+                <td style="display: none;">{{ movement.sdate }}</td>
+                <td>{{ movement.date }}</td>
+                <td>{{ movement.invoice }}</td>
+                <td>{{ movement.name }}</td>
+                <td>{{ movement.quantity }}</td>
+                <td>{{ movement.unit }}</td>
+                <td>{{ movement.price }}</td> <!-- Price data -->
+                <td class="total-price"></td> <!-- Total data (to be calculated in JS) -->
+                <td>{{ movement.payment }}</td>
+                <td>{{ movement.User }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="no-products">No data available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <table>
+    <tfoot>
+        <tr>
+            
+            <td colspan="2" style="text-align: right;">Cash:</td>
+            <td id="cashTotal"></td> <!-- Cash Total -->
+            <td></td>
+        
+            <td colspan="2" style="text-align: right;">Fonepay:</td>
+            <td id="fonepayTotal"></td> <!-- Fonepay Total -->
+            <td></td>
+        
+            <td colspan="2" style="text-align: right;">Card:</td>
+            <td id="cardTotal"></td> <!-- Card Total -->
+            <td></td>
+
+            <td colspan="2" style="text-align: right;">Grand Total:</td>
+            <td id="grandTotal"></td> <!-- Grand Total -->
+            <td></td>
+        
+        </tr>
+    </tfoot>
+    </table>
+
+    {% else %}
+        <p class="no-products">No data available.</p>
+    {% endif %}
+</div>
+
+<script>
+    function setTodayDate() {
+        const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+        document.getElementById('startDate').value = today;
+        document.getElementById('endDate').value = today;
+    }
+
+    function formatCurrency(value) {
+        return `${value.toFixed(2)}`;
+    }
+
+    function filterTable() {
+        let input = document.getElementById("stockSearch");
+        let startDate = document.getElementById("startDate").value;
+        let endDate = document.getElementById("endDate").value;
+        let filter = input.value.toLowerCase();
+        let table = document.getElementById("stockTable");
+        let tr = table.getElementsByTagName("tr");
+
+        let start = startDate ? new Date(startDate) : null;
+        let end = endDate ? new Date(endDate) : null;
+        if (start) start.setHours(0, 0, 0, 0);
+        if (end) end.setHours(23, 59, 59, 999);
+
+        for (let i = 1; i < tr.length; i++) {
+            let td = tr[i].getElementsByTagName("td");
+            let rowContainsSearchTerm = false;
+            let rowDate = new Date(td[0].innerHTML); 
+            rowDate.setHours(0, 0, 0, 0);
+            let isWithinDateRange = true;
+
+            if (start && end) {
+                isWithinDateRange = rowDate >= start && rowDate <= end;
+            } else if (start) {
+                isWithinDateRange = rowDate >= start;
+            } else if (end) {
+                isWithinDateRange = rowDate <= end;
+            }
+
+            for (let j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    if (td[j].innerHTML.toLowerCase().indexOf(filter) > -1) {
+                        rowContainsSearchTerm = true;
+                        break;
+                    }
+                }
+            }
+
+            tr[i].style.display = (rowContainsSearchTerm && isWithinDateRange) ? "" : "none";
+        }
+
+        calculateTotals(); // Recalculate totals after filtering
+    }
+
+    function clearFilters() {
+        document.getElementById("stockSearch").value = "";
+        document.getElementById("startDate").value = "";
+        document.getElementById("endDate").value = "";
+        filterTable(); 
+    }
+
+    function calculateTotals() {
+        let table = document.getElementById("stockTable");
+        let rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+        let grandTotal = 0;
+        let cashTotal = 0;
+        let fonepayTotal = 0;
+        let cardTotal = 0;
+
+        for (let i = 0; i < rows.length; i++) {
+            let cells = rows[i].getElementsByTagName("td");
+            if (cells.length > 0 && rows[i].style.display !== "none") { 
+                let quantity = parseFloat(cells[4].innerText) || 0; 
+                let price = parseFloat(cells[6].innerText) || 0; 
+                let total = quantity * price; 
+                cells[7].innerText = formatCurrency(total); 
+                grandTotal += total; 
+
+                let paymentMethod = cells[8].innerText.toLowerCase();
+                if (paymentMethod === 'cash') {
+                    cashTotal += total;
+                } else if (paymentMethod === 'fonepay') {
+                    fonepayTotal += total;
+                } else if (paymentMethod === 'card') {
+                    cardTotal += total;
+                }
+            }
+        }
+
+        document.getElementById("grandTotal").innerText = formatCurrency(grandTotal);
+        document.getElementById("cashTotal").innerText = formatCurrency(cashTotal);
+        document.getElementById("fonepayTotal").innerText = formatCurrency(fonepayTotal);
+        document.getElementById("cardTotal").innerText = formatCurrency(cardTotal);
+    }
+
+    window.onload = function() {
+        setTodayDate();
+        calculateTotals();
+        filterTable(); 
+    }
+</script>
 {% endblock %}
