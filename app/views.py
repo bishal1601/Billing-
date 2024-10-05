@@ -5,47 +5,125 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.models import User
 from app.forms import ProductForm, UnitForm, UserForm, VendorForm
-from app.models import Product, Stock, StockMovement, Unit, Vendor
-from django.db.models.aggregates import Sum
+from app.models import Product,  StockMovement, Unit, Vendor,Profile
+from django.http import JsonResponse
+from .models import Collectionsale, Product, StockMovement
+
 
 from django.http.response import JsonResponse
 
 from django.views.decorators.csrf import csrf_exempt
 
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+
 # Create your views here.
+@login_required(login_url='/')
 def home(request):
-    return render(request,"menubar.html")
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
+
+    # If the user is admin, render the menubar page
+    return render(request, "menubar.html")
+
+@login_required(login_url='/')
 def purchase_report(request):
-    # Retrieve stock movements with a specific channel type (e.g., 'purchase')
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
+
     stockmovements = StockMovement.objects.filter(channel='Purchase')
-    
     return render(request, 'purchase_report.html', {'stockmovements': stockmovements})
 
+@login_required(login_url='/')
 def sales_report(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     stockmovements = StockMovement.objects.filter(channel='Sale').order_by('-date')
     
     return render(request, 'sales_report.html', {'stockmovements': stockmovements})
 
+
+@login_required(login_url='/')
 def expiry_report(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     stockmovements = StockMovement.objects.filter(channel='Damage')
     
     return render(request, 'expiry_report.html', {'stockmovements': stockmovements})
 
+
+@login_required(login_url='/')
 def product_report(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     products = Product.objects.all()
     return render(request, 'product_report.html', {'products': products})
 
+
+@login_required(login_url='/')
 def add_product(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     form = ProductForm()
-    
+
     if request.method == "POST":
         form = ProductForm(request.POST)
         if form.is_valid():
-            form.save()
+            product = form.save(commit=False)
+            product.user = request.user 
+            product.save()
             return redirect('/product_report/')
+    
     return render(request, 'add_product.html', {'form': form})
 
+
+
+@login_required(login_url='/')
 def update_product(request, id):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     # Fetch the product instance or return a 404 error if not found
     product = get_object_or_404(Product, id=id)
     form = ProductForm(instance=product)
@@ -53,7 +131,9 @@ def update_product(request, id):
     if request.method == "POST":
         form = ProductForm(request.POST, instance=product)
         if form.is_valid():
-            form.save()
+            product = form.save(commit=False)
+            product.user = request.user 
+            product.save()
             # Redirect to the product list or detail page after a successful update
             return redirect('/product_report/')  # Replace 'product_list' with your URL name or path
 
@@ -63,8 +143,16 @@ def update_product(request, id):
 
 
 
-
+@login_required(login_url='/')
 def stock_report(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     # Retrieve all stock movements
     stockmovements = StockMovement.objects.all()
 
@@ -100,51 +188,129 @@ def stock_report(request):
 
 
 
-
+@login_required(login_url='/')
 def collection_report(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     stockmovements = StockMovement.objects.filter(channel='Sale')
     
     return render(request, 'collection_report.html', {'stockmovements': stockmovements})
     
-
+@login_required(login_url='/')
 def add_purchase (request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     return render(request,'add_purchase.html')
 
+@login_required(login_url='/')
 def refund_report(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     stockmovements = StockMovement.objects.filter(channel='Refund')
     
     return render(request, 'refund_report.html', {'stockmovements': stockmovements})
 
+
+@login_required(login_url='/')
 def add_unit(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     form = UnitForm()
     
     if request.method == "POST":
         form = UnitForm(request.POST)
         if form.is_valid():
-            form.save()
+            unit=form.save(commit=False)
+            unit.User= request.user 
+            unit.save()
             return redirect('/unit_report/')
     return render(request, 'add_unit.html', {'form': form})
 
+
+@login_required(login_url='/')
 def update_unit(request, id):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     unit = Unit.objects.get(id=id)
     form = UnitForm(instance=unit)
     if request.method == "POST":
         form = UnitForm(request.POST, instance=unit)
         if form.is_valid():
-            form.save()
+            unit=form.save(commit=False)
+            unit.User= request.user 
+            unit.save()
             return redirect('/unit_report/')
     return render(request, 'update_unit.html', {'form': form})
 
+
+@login_required(login_url='/')
 def unit_report(request):
-      units=Unit.objects.all()
-      return render(request, 'unit.html', {'units': units})
+    try:
+        profile = Profile.objects.get(user=request.user)
 
+        if profile.user_type != 'admin':
+            return redirect('/')
 
+    except Profile.DoesNotExist:
+        return redirect('/')
+    units=Unit.objects.all()
+    return render(request, 'unit.html', {'units': units})
+
+@login_required(login_url='/')
 def user_list(request):
-    users = User.objects.all()
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
+    users = User.objects.prefetch_related('profile').all()  # Use select_related for single FK relations
     return render(request, 'user_list.html', {'users': users})
 
+
+
+@login_required(login_url='/')
 def add_user(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     if request.method == "POST":
         form = UserForm(request.POST)
         if form.is_valid():
@@ -165,7 +331,8 @@ def add_user(request):
                     if status is not None:
                         user.is_active = status
                     user.save()
-
+                    user_type = form.cleaned_data.get('user_type', 'cashier')  # Default to 'cashier'
+                    Profile.objects.create(user=user, user_type=user_type)
                     return redirect('/user_list/')
                 else:
                     form.add_error('password', 'Passwords do not match.')
@@ -178,7 +345,17 @@ def add_user(request):
     
     return render(request, 'add_user.html', {'form': form})
 
+
+@login_required(login_url='/')
 def update_user(request, id):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     user = get_object_or_404(User, id=id)  # Get the user or raise a 404 error if not found
     
     if request.method == 'POST':
@@ -195,16 +372,16 @@ def update_user(request, id):
 
 
 
-
-
-
-
-
-
-
-
-
+@login_required(login_url='/')
 def add_vendor(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     if request.method == 'POST':
         vendor_name = request.POST.get('vendor_name')
         vendor_panno = request.POST.get('vendor_panno')
@@ -219,6 +396,8 @@ def add_vendor(request):
             address=vendor_address,
             contact=vendor_contact,
             status=vendor_status,
+            user= request.user 
+            
             )
             
         
@@ -239,8 +418,16 @@ def check_vendor_exists(request):
     return JsonResponse({'name_exists': name_exists, 'pan_exists': pan_exists})
 
 
-
+@login_required(login_url='/')
 def update_vendor(request, id):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     vendor = get_object_or_404(Vendor, id=id)
 
     if request.method == 'POST':
@@ -256,19 +443,28 @@ def update_vendor(request, id):
     return render(request, 'update_vendor.html', {'form': form})
 
 
+@login_required(login_url='/')
 def vendor_report(request):
+    try:
+        profile = Profile.objects.get(user=request.user)
+
+        if profile.user_type != 'admin':
+            return redirect('/')
+
+    except Profile.DoesNotExist:
+        return redirect('/')
     vendors = Vendor.objects.all()
     return render(request, 'vendor_report.html', {'vendors': vendors})
 
 
 
 
-
+@login_required(login_url='/')
 def sales_channel(request):
+
     return render(request,'sales_channel.html')
 
-from django.http import JsonResponse
-from .models import Collectionsale, Holdsale, Product, StockMovement
+
 
 def api_products(request):
     products = Product.objects.filter(status=True)
@@ -327,7 +523,8 @@ def add_to_holdsale(request):
                     name=product_name,
                     quantity=quantity,
                     channel="Hold",
-                    price=float(price)  # Save the price field
+                    price=float(price),  # Save the price field
+                    user=request.user,
                 )
 
             return JsonResponse({'success': True, 'message': 'Product added to holdsale'})
@@ -543,3 +740,38 @@ def update_channel_and_invoice_card(request):
 
     # For GET requests or others, simply reload the page as well
     return redirect('/sales_channel/')
+
+
+def loginn(request):
+    error_message = None  # Initialize error message
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        # Authenticate the user
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)  # Log the user in
+
+            # Check if the user is an admin based on the Profile model
+            try:
+                profile = Profile.objects.get(user=user)
+
+                if profile.user_type == 'admin':
+                    return redirect('/home/')  # Redirect admin to /home/
+                else:
+                    return redirect('/sales_channel/')  # Redirect non-admin to /sales_channel/
+            except Profile.DoesNotExist:
+                # Handle the case where a user doesn't have a profile
+                error_message = "Profile not found. Please contact support."
+        else:
+            error_message = "Invalid username or password"  # Set error message
+
+    return render(request, 'login.html', {'error_message': error_message})
+
+
+
+def logoutt(request):
+    logout(request)
+    return redirect('/')
