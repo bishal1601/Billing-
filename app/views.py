@@ -523,7 +523,8 @@ def add_to_holdsale(request):
                     name=product_name,
                     quantity=quantity,
                     channel="Hold",
-                    price=float(price)  # Save the price field
+                    price=float(price),  # Save the price field
+                    user=request.user,
                 )
 
             return JsonResponse({'success': True, 'message': 'Product added to holdsale'})

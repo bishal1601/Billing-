@@ -97,7 +97,7 @@ class StockMovement(models.Model):
     unit = models.CharField(max_length=255,choices=Unit.get_unit_choices) # Store the unit associated with the product (e.g., pieces, kilograms)
     channel = models.CharField(max_length=20)  # Store the channel through which the stock movement occurred (e.g., online, in-store)
     invoice=models.IntegerField(blank=True, null=True)
-    User = models.ForeignKey(User, on_delete=models.CASCADE, default=1, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1, blank=True, null=True)
     vendor=models.CharField(max_length=255,choices=Vendor.get_vendor_choices, null=True,blank=True)
     pdate=models.DateField(null=True,blank=True)
     sdate=models.DateField(auto_now_add=True,null=True,blank=True)
