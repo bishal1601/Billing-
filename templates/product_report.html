@@ -135,6 +135,7 @@
                     <th>Opening Stock</th>
                     <th>Unit</th>
                     <th>Status</th>
+                    <th>User</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -156,6 +157,7 @@
                             {% endif %}
                         </span>
                     </td>
+                    <td>{{ product.user }}</td>
                     <td>
                         <a href="/update_product/{{ product.id }}" class="edit-button">
                             <i class="fas fa-edit"></i>Edit
