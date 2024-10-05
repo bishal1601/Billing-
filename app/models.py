@@ -1,6 +1,22 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
+
+class Profile(models.Model):
+    USER_TYPE_CHOICES = [
+        ('admin', 'Admin'),
+        ('cashier', 'Cashier'),
+        # Add other user types as needed
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='cashier')
+
+    def __str__(self):
+        return self.user.username
+
+
 class Unit(models.Model):
     FullName = models.CharField(max_length=100)
     ShortName = models.CharField(max_length=10)
@@ -21,7 +37,7 @@ class Product(models.Model):
     opening_stock = models.PositiveIntegerField(default=0)
     description = models.TextField(blank=True)
     status = models.BooleanField(default=True)  
-    User = models.ForeignKey(User, on_delete=models.CASCADE, default=1, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1, blank=True, null=True)
     @classmethod
     def get_product_choices(cls):
         return [(product.name, product.name) for product in cls.objects.filter(status=True)]
@@ -59,7 +75,7 @@ class Vendor(models.Model):
     address = models.CharField(max_length=255, blank=True, null=True)
     contact = models.CharField(max_length=20, blank=True, null=True)  # Changed to CharField
     status = models.BooleanField(default=True)  
-
+    
     @classmethod
     def get_vendor_choices(cls):
         return [(vendor.vendor, vendor.vendor) for vendor in cls.objects.filter(status=True)]
